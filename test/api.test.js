@@ -140,3 +140,19 @@ test('matched routes are logged with method, path, and status', async () => {
         `expected 200 log, got: ${logs.join(' | ')}`,
     );
 });
+
+test('CORS preflight is logged', async () => {
+    logs.length = 0;
+    const res = await fetch(`${baseUrl}/v1/chat/completions`, {
+        method: 'OPTIONS',
+        headers: {
+            Origin: 'https://insiders.vscode.dev',
+            'Access-Control-Request-Method': 'POST',
+        },
+    });
+    assert.ok(res.status === 204 || res.status === 200);
+    assert.ok(
+        logs.some((line) => /OPTIONS \/v1\/chat\/completions (204|200)/.test(line)),
+        `expected OPTIONS log, got: ${logs.join(' | ')}`,
+    );
+});

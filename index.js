@@ -15,6 +15,16 @@ function createApp() {
     const app = new Koa();
     const router = new Router();
 
+    // Log first so CORS preflight and unmatched 404s are both visible.
+    app.use(async (ctx, next) => {
+        try {
+            await next();
+        } finally {
+            const status = ctx.status || 404;
+            console.log(`${ctx.method} ${ctx.path} ${status}`);
+        }
+    });
+
     // Reflect any Origin so Cursor desktop, Codespaces, and browsers can call the mock.
     app.use(cors({
         origin: (ctx) => ctx.get('Origin') || '*',
@@ -30,15 +40,6 @@ function createApp() {
         ],
         credentials: true,
     }));
-
-    app.use(async (ctx, next) => {
-        try {
-            await next();
-        } finally {
-            const status = ctx.status || 404;
-            console.log(`${ctx.method} ${ctx.path} ${status}`);
-        }
-    });
 
     app.use(bodyParser());
 
